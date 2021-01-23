@@ -17,4 +17,10 @@ public class CartServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CartServiceApplication.class, args);
 	}
+	
+	@Bean
+	public RestTemplate restTemplate(){
+		RestTemplate restTemplate = new RestTemplate();
+		return restTemplate;
+	}
 }
