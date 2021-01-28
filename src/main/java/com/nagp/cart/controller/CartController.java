@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nagp.cart.dto.AddProductToCartRequestDTO;
+import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
 import com.nagp.cart.service.CartService;
 
@@ -32,5 +33,13 @@ public class CartController {
 	public CartEntryDTO addProductToCart(@RequestBody AddProductToCartRequestDTO addToCartRequest)
 	{
 		return cartService.addToCart(addToCartRequest.getProductCode(), addToCartRequest.getCartId(), addToCartRequest.getQuantity());
+	}
+	
+	
+	@RequestMapping(value = "{cartId}", method = RequestMethod.GET)
+	@ApiOperation("Get cart by cartId")
+	@ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = CartDTO.class)})
+	public CartDTO getCartById(Long cartId) {
+		return cartService.getCartById(cartId);
 	}
 }
