@@ -1,5 +1,7 @@
 package com.nagp.cart.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.nagp.cart.dto.CartDTO;
@@ -12,5 +14,5 @@ public interface CartService {
 	
 	CartDTO getCartById(Long cartId);
 	
-//	CartEntryDTO findCartByUser(String userId);
+	CartDTO findCartByUser(String userId);
 }

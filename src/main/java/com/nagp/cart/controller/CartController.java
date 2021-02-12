@@ -3,6 +3,7 @@ package com.nagp.cart.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +28,7 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "entry", method = RequestMethod.POST)
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class)})
@@ -35,11 +37,19 @@ public class CartController {
 		return cartService.addToCart(addToCartRequest.getProductCode(), addToCartRequest.getCartId(), addToCartRequest.getQuantity());
 	}
 	
-	
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "{cartId}", method = RequestMethod.GET)
 	@ApiOperation("Get cart by cartId")
 	@ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = CartDTO.class)})
-	public CartDTO getCartById(Long cartId) {
-		return cartService.getCartById(cartId);
+	public CartDTO getCartById(String cartId) {
+		return cartService.getCartById(Long.parseLong(cartId));
+	}
+	
+	@CrossOrigin(origins = "*")
+	@RequestMapping(value = "{userId}", method = RequestMethod.GET)
+	@ApiOperation("Get cart by userId")
+	@ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = CartDTO.class)})
+	public CartDTO getCartByUserId(String userId) {
+		return cartService.findCartByUser(userId);
 	}
 }

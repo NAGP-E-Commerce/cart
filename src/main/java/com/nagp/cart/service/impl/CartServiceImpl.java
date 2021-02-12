@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.yaml.snakeyaml.extensions.compactnotation.CompactData;
 
 import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
@@ -79,7 +80,7 @@ public class CartServiceImpl implements CartService{
 	{
 		URI uri = null;
 		try {
-			uri = new URI(PRODUCT_SERVICE_URL + "product/" + "1000");
+			uri = new URI(PRODUCT_SERVICE_URL + "product/" + productCode);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
@@ -149,5 +150,17 @@ public class CartServiceImpl implements CartService{
 //		target.setStatus("Active");
 		target.setUserId(source.getUserId());
 		
+	}
+	
+	@Override
+	public CartDTO findCartByUser(String userId) {
+		Cart cart = cartRepository.findByUserId(userId);
+		CartDTO cartData = new CartDTO();
+		if(cart != null)
+		{
+			populate(cart, cartData);
+		}
+		populate(cart, cartData);
+		return cartData;
 	}
 }
