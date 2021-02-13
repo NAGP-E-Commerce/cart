@@ -25,49 +25,57 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class CartServiceImpl implements CartService{
+public class CartServiceImpl implements CartService {
 
 	@Autowired
 	CartRepository cartRepository;
-	
+
 	@Autowired
 	EntryRepository cartEntryRepository;
-	
+
 	@Autowired
 	RestTemplate restTemplate;
-	
+
 	private static final String PRODUCT_SERVICE_URL = "http://localhost:8090/api/ecommerce/";
-	
+
 	@Override
 	public CartEntryDTO addToCart(String productCode, Long cartId, Long quantity) {
 		Cart cart = null;
 		final Optional<Cart> cartOp = cartRepository.findById(cartId);
-		if(cartOp.isPresent()) {
+		if (cartOp.isPresent()) {
 			log.debug("found cart with id {}", cartId);
 			cart = cartOp.get();
-		}		
-		if(cart == null) {
+		}
+		if (cart == null) {
 			cart = new Cart();
 		}
 		ProductDTO product = getProduct(productCode);
 		Entry cartEntry = addProductToCart(cart, quantity, product);
-		CartEntryDTO cartEntryDTO =new CartEntryDTO();
+		CartEntryDTO cartEntryDTO = new CartEntryDTO();
 		populateCartEntry(cartEntry, cartEntryDTO);
 		return cartEntryDTO;
 	}
-	
+
+	@Override
+	public CartDTO createCart() {
+		Cart cart = new Cart();
+		cartRepository.save(cart);
+		CartDTO cartDTO = new CartDTO();
+		populate(cart, cartDTO);
+		return cartDTO;
+	}
+
 	@Override
 	public CartDTO getCartById(Long cartId) {
 		Cart cart = null;
-		if(cartId!=null)
-		{
+		if (cartId != null) {
 			Optional<Cart> cartOp = cartRepository.findById(cartId);
 			if (cartOp.isPresent()) {
 				cart = cartOp.get();
+			} else {
+				return null;
 			}
-		}
-		else
-		{
+		} else {
 			cart = new Cart();
 			cartRepository.save(cart);
 		}
@@ -75,9 +83,8 @@ public class CartServiceImpl implements CartService{
 		populate(cart, cartDTO);
 		return cartDTO;
 	}
-	
-	private ProductDTO getProduct(String productCode) 
-	{
+
+	private ProductDTO getProduct(String productCode) {
 		URI uri = null;
 		try {
 			uri = new URI(PRODUCT_SERVICE_URL + "product/" + productCode);
@@ -87,17 +94,17 @@ public class CartServiceImpl implements CartService{
 		ProductDTO product = restTemplate.getForObject(uri, ProductDTO.class);
 		return product;
 	}
-	
+
 	private Entry addProductToCart(Cart cart, Long quantity, ProductDTO product) {
-		for(Entry cartEntry : cart.getCartEntries()) {
-			if(cartEntry.getProductCode().equalsIgnoreCase(product.getCode())) {
+		for (Entry cartEntry : cart.getCartEntries()) {
+			if (cartEntry.getProductCode().equalsIgnoreCase(product.getCode())) {
 				cartEntry.setQuantity(cartEntry.getQuantity() + quantity);
 				cartEntryRepository.save(cartEntry);
 				return cartEntry;
 			}
 		}
-		
-		if(CollectionUtils.isEmpty(cart.getCartEntries())) {
+
+		if (CollectionUtils.isEmpty(cart.getCartEntries())) {
 			cart.setCartEntries(new ArrayList<>());
 		}
 		Entry cartEntry = new Entry();
@@ -109,10 +116,10 @@ public class CartServiceImpl implements CartService{
 		cartEntryRepository.save(cartEntry);
 		cart.getCartEntries().add(cartEntry);
 		cartRepository.save(cart);
-		
+
 		return cartEntry;
 	}
-	
+
 	public void populateCartEntry(Entry source, CartEntryDTO target) {
 		target.setQuantity(source.getQuantity());
 		target.setProductCode(source.getProductCode());
@@ -121,7 +128,7 @@ public class CartServiceImpl implements CartService{
 		target.setTotal(source.getPrice() * source.getQuantity());
 		target.setImageUrl(source.getImageUrl());
 	}
-	
+
 	private void populate(Cart source, CartDTO target) {
 		List<Entry> entries = source.getCartEntries();
 		List<CartEntryDTO> cartEntries = new ArrayList<>();
@@ -130,8 +137,7 @@ public class CartServiceImpl implements CartService{
 		Double totalDiscount = Double.valueOf(0);
 		Double subTotal = Double.valueOf(0);
 		Double tax = Double.valueOf(0);
-		if(entries!=null && entries.size()>0)
-		{
+		if (entries != null && entries.size() > 0) {
 			for (Entry entry : entries) {
 				CartEntryDTO cartEntry = new CartEntryDTO();
 				populateCartEntry(entry, cartEntry);
@@ -139,7 +145,7 @@ public class CartServiceImpl implements CartService{
 				subTotal += cartEntry.getPrice() * cartEntry.getQuantity();
 			}
 		}
-		
+
 		tax = subTotal / 10;
 		total = subTotal + tax;
 		target.setGrossTotal(subTotal);
@@ -149,18 +155,18 @@ public class CartServiceImpl implements CartService{
 		target.setItems(cartEntries);
 //		target.setStatus("Active");
 		target.setUserId(source.getUserId());
-		
+
 	}
-	
+
 	@Override
 	public CartDTO findCartByUser(String userId) {
 		Cart cart = cartRepository.findByUserId(userId);
 		CartDTO cartData = new CartDTO();
-		if(cart != null)
-		{
+		if (cart != null) {
 			populate(cart, cartData);
 		}
 		populate(cart, cartData);
 		return cartData;
 	}
+
 }

@@ -1,9 +1,12 @@
 package com.nagp.cart.controller;
 
+import javax.validation.constraints.NotBlank;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,28 +31,33 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
-	@CrossOrigin(origins = "*")
-	@RequestMapping(value = "entry", method = RequestMethod.POST)
+	@RequestMapping(value = "/entry", method = RequestMethod.POST)
 	@ApiOperation("Add product to cart")
-	@ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class)})
-	public CartEntryDTO addProductToCart(@RequestBody AddProductToCartRequestDTO addToCartRequest)
-	{
-		return cartService.addToCart(addToCartRequest.getProductCode(), addToCartRequest.getCartId(), addToCartRequest.getQuantity());
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
+	public CartEntryDTO addProductToCart(@RequestBody AddProductToCartRequestDTO addToCartRequest) {
+		return cartService.addToCart(addToCartRequest.getProductCode(), addToCartRequest.getCartId(),
+				addToCartRequest.getQuantity());
 	}
-	
-	@CrossOrigin(origins = "*")
-	@RequestMapping(value = "{cartId}", method = RequestMethod.GET)
+
+	@RequestMapping(value = "/{cartId}", method = RequestMethod.GET)
 	@ApiOperation("Get cart by cartId")
-	@ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = CartDTO.class)})
-	public CartDTO getCartById(String cartId) {
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
+	public CartDTO getCartById(@PathVariable("cartId") @NotBlank(message = "id must not be empty") String cartId) {
 		return cartService.getCartById(Long.parseLong(cartId));
 	}
-	
-	@CrossOrigin(origins = "*")
-	@RequestMapping(value = "{userId}", method = RequestMethod.GET)
+
+	@RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
 	@ApiOperation("Get cart by userId")
-	@ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = CartDTO.class)})
-	public CartDTO getCartByUserId(String userId) {
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
+	public CartDTO getCartByUserId(@PathVariable("userId") @NotBlank(message = "id must not be empty") String userId) {
 		return cartService.findCartByUser(userId);
+	}
+	
+
+	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@ApiOperation("Create cart")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
+	public CartDTO createCart() {
+		return cartService.createCart();
 	}
 }

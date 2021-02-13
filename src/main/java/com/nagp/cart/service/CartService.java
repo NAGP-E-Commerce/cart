@@ -15,4 +15,6 @@ public interface CartService {
 	CartDTO getCartById(Long cartId);
 	
 	CartDTO findCartByUser(String userId);
+
+	CartDTO createCart();
 }
