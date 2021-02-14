@@ -4,20 +4,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.yaml.snakeyaml.extensions.compactnotation.CompactData;
 
 import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
 import com.nagp.cart.entity.Cart;
 import com.nagp.cart.entity.Entry;
-import com.nagp.cart.repo.EntryRepository;
 import com.nagp.cart.repo.CartRepository;
+import com.nagp.cart.repo.EntryRepository;
 import com.nagp.cart.service.CartService;
 import com.nagp.product.dto.ProductDTO;
 
@@ -43,7 +43,6 @@ public class CartServiceImpl implements CartService {
 		Cart cart = null;
 		final Optional<Cart> cartOp = cartRepository.findById(cartId);
 		if (cartOp.isPresent()) {
-			log.debug("found cart with id {}", cartId);
 			cart = cartOp.get();
 		}
 		if (cart == null) {
@@ -54,6 +53,19 @@ public class CartServiceImpl implements CartService {
 		CartEntryDTO cartEntryDTO = new CartEntryDTO();
 		populateCartEntry(cartEntry, cartEntryDTO);
 		return cartEntryDTO;
+	}
+
+	@Override
+	public void removeProductFromCart(String productCode, Long cartId, Long quantity) {
+		Cart cart = null;
+		final Optional<Cart> cartOp = cartRepository.findById(cartId);
+		if (cartOp.isPresent()) {
+			cart = cartOp.get();
+		}
+		if (cart != null) {
+			ProductDTO product = getProduct(productCode);
+			removeProductFromCart(cart, quantity, product);
+		}
 	}
 
 	@Override
@@ -93,6 +105,27 @@ public class CartServiceImpl implements CartService {
 		}
 		ProductDTO product = restTemplate.getForObject(uri, ProductDTO.class);
 		return product;
+	}
+
+	private void removeProductFromCart(Cart cart, Long quantity, ProductDTO product) {
+		Entry entry = null;
+		for (Entry cartEntry : cart.getCartEntries()) {
+			if (cartEntry.getProductCode().equalsIgnoreCase(product.getCode())) {
+				entry = cartEntry;
+			}
+		}
+
+		if (Objects.nonNull(entry)) {
+			Double entryQuantity = entry.getQuantity();
+			if (entryQuantity > quantity) {
+				entry.setQuantity(entryQuantity - quantity);
+				cartEntryRepository.save(entry);
+				cartRepository.save(cart);
+			} else {
+				cart.setCartEntries(new ArrayList<>());
+				cartRepository.save(cart);
+			}
+		}
 	}
 
 	private Entry addProductToCart(Cart cart, Long quantity, ProductDTO product) {
