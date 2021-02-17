@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nagp.cart.dto.AddProductToCartRequestDTO;
 import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
+import com.nagp.cart.dto.PlaceOrderRequestDTO;
 import com.nagp.cart.service.CartService;
 
 import io.swagger.annotations.Api;
@@ -72,5 +73,14 @@ public class CartController {
 	public void removeProductFromCart(@RequestBody AddProductToCartRequestDTO addToCartRequest) {
 		cartService.removeProductFromCart(addToCartRequest.getProductId(), addToCartRequest.getCartId(),
 				addToCartRequest.getQuantity());
+	}
+    
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/place/order", method = RequestMethod.PUT)
+    @ApiOperation("Place order")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = PlaceOrderRequestDTO.class) })
+	public boolean placeOrder(@RequestBody PlaceOrderRequestDTO placeOrderRequestDTO)
+	{
+		return cartService.placeOrder(placeOrderRequestDTO);
 	}
 }

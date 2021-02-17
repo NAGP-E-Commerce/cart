@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
+import com.nagp.cart.dto.PlaceOrderRequestDTO;
 
 @Service
 public interface CartService {
@@ -17,4 +18,6 @@ public interface CartService {
 	CartDTO createCart();
 
 	void removeProductFromCart(String productId, Long cartId, Long quantity);
+	
+	boolean placeOrder(PlaceOrderRequestDTO cartId);
 }

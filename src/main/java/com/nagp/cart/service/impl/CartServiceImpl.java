@@ -3,23 +3,29 @@ package com.nagp.cart.service.impl;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
+import com.nagp.cart.dto.PlaceOrderRequestDTO;
 import com.nagp.cart.entity.Cart;
 import com.nagp.cart.entity.Entry;
 import com.nagp.cart.repo.CartRepository;
 import com.nagp.cart.repo.EntryRepository;
 import com.nagp.cart.service.CartService;
 import com.nagp.product.dto.ProductDTO;
+import com.nagp.stock.dto.ProductStockDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +43,8 @@ public class CartServiceImpl implements CartService {
 	RestTemplate restTemplate;
 
 	private static final String PRODUCT_SERVICE_URL = "http://localhost:8090/api/ecommerce/";
+	
+	private static final String INVENTORY_SERVICE_URL = "http://localhost:8091/im/api/ecommerce/";
 
 	@Override
 	public CartEntryDTO addToCart(String productId, Long cartId, Long quantity) {
@@ -199,5 +207,50 @@ public class CartServiceImpl implements CartService {
 		populate(cart, cartData);
 		return cartData;
 	}
-
+	
+	@Override
+	public boolean placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO) 
+	{
+		Cart cart = null;
+		Optional<Cart> cartOp = cartRepository.findById(placeOrderRequestDTO.getCartId());
+		if (cartOp.isPresent()) {
+			cart = cartOp.get();
+		}
+		cart.setStatus("Ordered");
+		cartRepository.save(cart);
+		deductStock(cart.getCartEntries());
+		CartDTO cartData = new CartDTO();
+		populate(cart, cartData);
+		return true;
+		
+	}
+	
+	private void deductStock(List<Entry> cartEntries) {
+		for(Entry entry : cartEntries)
+		{
+			reduceStock(entry.getProductId(), entry.getQuantity());
+		}
+		
+	}
+	
+	private void reduceStock(String productCode, Double quantity) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		
+		ProductStockDTO productStockDTO = new ProductStockDTO();
+		productStockDTO.setProductCode(productCode);
+		productStockDTO.setQuantity(quantity.intValue());
+		HttpEntity<ProductStockDTO> httpEntity = new HttpEntity<>(productStockDTO, headers);
+		
+		URI uri = null;
+		try {
+			uri = new URI(INVENTORY_SERVICE_URL + "inventory/reduceStock");
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		restTemplate.postForObject(uri, httpEntity, Boolean.class);
+		
+	}
 }
