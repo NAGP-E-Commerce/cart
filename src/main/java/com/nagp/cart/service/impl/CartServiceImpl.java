@@ -39,7 +39,7 @@ public class CartServiceImpl implements CartService {
 	private static final String PRODUCT_SERVICE_URL = "http://localhost:8090/api/ecommerce/";
 
 	@Override
-	public CartEntryDTO addToCart(String productCode, Long cartId, Long quantity) {
+	public CartEntryDTO addToCart(String productId, Long cartId, Long quantity) {
 		Cart cart = null;
 		final Optional<Cart> cartOp = cartRepository.findById(cartId);
 		if (cartOp.isPresent()) {
@@ -48,7 +48,7 @@ public class CartServiceImpl implements CartService {
 		if (cart == null) {
 			cart = new Cart();
 		}
-		ProductDTO product = getProduct(productCode);
+		ProductDTO product = getProduct(productId);
 		Entry cartEntry = addProductToCart(cart, quantity, product);
 		CartEntryDTO cartEntryDTO = new CartEntryDTO();
 		populateCartEntry(cartEntry, cartEntryDTO);
@@ -56,14 +56,14 @@ public class CartServiceImpl implements CartService {
 	}
 
 	@Override
-	public void removeProductFromCart(String productCode, Long cartId, Long quantity) {
+	public void removeProductFromCart(String productId, Long cartId, Long quantity) {
 		Cart cart = null;
 		final Optional<Cart> cartOp = cartRepository.findById(cartId);
 		if (cartOp.isPresent()) {
 			cart = cartOp.get();
 		}
 		if (cart != null) {
-			ProductDTO product = getProduct(productCode);
+			ProductDTO product = getProduct(productId);
 			removeProductFromCart(cart, quantity, product);
 		}
 	}
@@ -96,10 +96,10 @@ public class CartServiceImpl implements CartService {
 		return cartDTO;
 	}
 
-	private ProductDTO getProduct(String productCode) {
+	private ProductDTO getProduct(String productId) {
 		URI uri = null;
 		try {
-			uri = new URI(PRODUCT_SERVICE_URL + "product/" + productCode);
+			uri = new URI(PRODUCT_SERVICE_URL + "product/" + productId);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
@@ -110,7 +110,7 @@ public class CartServiceImpl implements CartService {
 	private void removeProductFromCart(Cart cart, Long quantity, ProductDTO product) {
 		Entry entry = null;
 		for (Entry cartEntry : cart.getCartEntries()) {
-			if (cartEntry.getProductCode().equalsIgnoreCase(product.getCode())) {
+			if (cartEntry.getProductId().equalsIgnoreCase(product.getProductId())) {
 				entry = cartEntry;
 			}
 		}
@@ -120,17 +120,15 @@ public class CartServiceImpl implements CartService {
 			if (entryQuantity > quantity) {
 				entry.setQuantity(entryQuantity - quantity);
 				cartEntryRepository.save(entry);
-				cartRepository.save(cart);
 			} else {
-				cart.setCartEntries(new ArrayList<>());
-				cartRepository.save(cart);
+				cartEntryRepository.delete(entry);
 			}
 		}
 	}
 
 	private Entry addProductToCart(Cart cart, Long quantity, ProductDTO product) {
 		for (Entry cartEntry : cart.getCartEntries()) {
-			if (cartEntry.getProductCode().equalsIgnoreCase(product.getCode())) {
+			if (cartEntry.getProductId().equalsIgnoreCase(product.getProductId())) {
 				cartEntry.setQuantity(cartEntry.getQuantity() + quantity);
 				cartEntryRepository.save(cartEntry);
 				return cartEntry;
@@ -142,7 +140,7 @@ public class CartServiceImpl implements CartService {
 		}
 		Entry cartEntry = new Entry();
 		cartEntry.setProductName(product.getName());
-		cartEntry.setProductCode(product.getCode());
+		cartEntry.setProductId(product.getProductId());
 		cartEntry.setPrice(product.getPrice());
 		cartEntry.setQuantity(product.getUnit());
 		cartEntry.setImageUrl(product.getPrimaryImageUrl());
@@ -155,7 +153,7 @@ public class CartServiceImpl implements CartService {
 
 	public void populateCartEntry(Entry source, CartEntryDTO target) {
 		target.setQuantity(source.getQuantity());
-		target.setProductCode(source.getProductCode());
+		target.setProductId(source.getProductId());
 		target.setProductName(source.getProductName());
 		target.setPrice(source.getPrice());
 		target.setTotal(source.getPrice() * source.getQuantity());

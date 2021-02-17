@@ -36,7 +36,7 @@ public class CartController {
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
 	public CartEntryDTO addProductToCart(@RequestBody AddProductToCartRequestDTO addToCartRequest) {
-		return cartService.addToCart(addToCartRequest.getProductCode(), addToCartRequest.getCartId(),
+		return cartService.addToCart(addToCartRequest.getProductId(), addToCartRequest.getCartId(),
 				addToCartRequest.getQuantity());
 	}
 
@@ -70,7 +70,7 @@ public class CartController {
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
 	public void removeProductFromCart(@RequestBody AddProductToCartRequestDTO addToCartRequest) {
-		cartService.removeProductFromCart(addToCartRequest.getProductCode(), addToCartRequest.getCartId(),
+		cartService.removeProductFromCart(addToCartRequest.getProductId(), addToCartRequest.getCartId(),
 				addToCartRequest.getQuantity());
 	}
 }

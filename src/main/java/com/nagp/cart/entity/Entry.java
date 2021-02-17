@@ -17,7 +17,7 @@ public class Entry {
 
 	private String productName;
 
-	private String productCode;
+	private String productId;
 
 	private Double price;
 
@@ -41,12 +41,12 @@ public class Entry {
 		this.productName = productName;
 	}
 
-	public String getProductCode() {
-		return productCode;
+	public String getProductId() {
+		return productId;
 	}
 
-	public void setProductCode(String productCode) {
-		this.productCode = productCode;
+	public void setProductId(String productId) {
+		this.productId = productId;
 	}
 
 	public Double getPrice() {

@@ -8,7 +8,7 @@ import com.nagp.cart.dto.CartEntryDTO;
 @Service
 public interface CartService {
 
-	CartEntryDTO addToCart(String productCode, Long cartId, Long quantity);
+	CartEntryDTO addToCart(String productId, Long cartId, Long quantity);
 
 	CartDTO getCartById(Long cartId);
 
@@ -16,5 +16,5 @@ public interface CartService {
 
 	CartDTO createCart();
 
-	void removeProductFromCart(String productCode, Long cartId, Long quantity);
+	void removeProductFromCart(String productId, Long cartId, Long quantity);
 }
