@@ -43,7 +43,7 @@ public class CartServiceImpl implements CartService {
 	RestTemplate restTemplate;
 
 	private static final String PRODUCT_SERVICE_URL = "http://localhost:8090/api/ecommerce/";
-	
+
 	private static final String INVENTORY_SERVICE_URL = "http://localhost:8091/im/api/ecommerce/";
 
 	@Override
@@ -57,10 +57,14 @@ public class CartServiceImpl implements CartService {
 			cart = new Cart();
 		}
 		ProductDTO product = getProduct(productId);
-		Entry cartEntry = addProductToCart(cart, quantity, product);
-		CartEntryDTO cartEntryDTO = new CartEntryDTO();
-		populateCartEntry(cartEntry, cartEntryDTO);
-		return cartEntryDTO;
+		if (product.getAvailableQty() > 0) {
+			Entry cartEntry = addProductToCart(cart, quantity, product);
+			CartEntryDTO cartEntryDTO = new CartEntryDTO();
+			populateCartEntry(cartEntry, cartEntryDTO);
+			return cartEntryDTO;
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -150,7 +154,7 @@ public class CartServiceImpl implements CartService {
 		cartEntry.setProductName(product.getName());
 		cartEntry.setProductId(product.getProductId());
 		cartEntry.setPrice(product.getPrice());
-		cartEntry.setQuantity(product.getUnit());
+		cartEntry.setQuantity(Double.valueOf(product.getAvailableQty().toString()));
 		cartEntry.setImageUrl(product.getPrimaryImageUrl());
 		cartEntryRepository.save(cartEntry);
 		cart.getCartEntries().add(cartEntry);
@@ -207,10 +211,9 @@ public class CartServiceImpl implements CartService {
 		populate(cart, cartData);
 		return cartData;
 	}
-	
+
 	@Override
-	public boolean placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO) 
-	{
+	public boolean placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO) {
 		Cart cart = null;
 		Optional<Cart> cartOp = cartRepository.findById(placeOrderRequestDTO.getCartId());
 		if (cartOp.isPresent()) {
@@ -222,28 +225,26 @@ public class CartServiceImpl implements CartService {
 		CartDTO cartData = new CartDTO();
 		populate(cart, cartData);
 		return true;
-		
+
 	}
-	
+
 	private void deductStock(List<Entry> cartEntries) {
-		for(Entry entry : cartEntries)
-		{
+		for (Entry entry : cartEntries) {
 			reduceStock(entry.getProductId(), entry.getQuantity());
 		}
-		
+
 	}
-	
-	private void reduceStock(String productCode, Double quantity) {
+
+	private void reduceStock(String productId, Double quantity) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		
-		
+
 		ProductStockDTO productStockDTO = new ProductStockDTO();
-		productStockDTO.setProductCode(productCode);
+		productStockDTO.setProductId(productId);
 		productStockDTO.setQuantity(quantity.intValue());
 		HttpEntity<ProductStockDTO> httpEntity = new HttpEntity<>(productStockDTO, headers);
-		
+
 		URI uri = null;
 		try {
 			uri = new URI(INVENTORY_SERVICE_URL + "inventory/reduceStock");
@@ -251,6 +252,6 @@ public class CartServiceImpl implements CartService {
 			e.printStackTrace();
 		}
 		restTemplate.postForObject(uri, httpEntity, Boolean.class);
-		
+
 	}
 }
