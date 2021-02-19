@@ -59,11 +59,11 @@ public class CartController {
 	
 
     @CrossOrigin(origins = "*")
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@RequestMapping(value = "/create/{userId}", method = RequestMethod.POST)
 	@ApiOperation("Create cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
-	public CartDTO createCart() {
-		return cartService.createCart();
+	public CartDTO createCart(@PathVariable("userId") @NotBlank(message = "id must not be empty") String userId) {
+		return cartService.createCart(userId);
 	}
 	
     @CrossOrigin(origins = "*")

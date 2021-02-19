@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
+import com.nagp.cart.dto.CartStatus;
 import com.nagp.cart.dto.PlaceOrderRequestDTO;
 import com.nagp.cart.entity.Cart;
 import com.nagp.cart.entity.Entry;
@@ -59,6 +60,7 @@ public class CartServiceImpl implements CartService {
 		ProductDTO product = getProduct(productId);
 		if (product.getAvailableQty() > 0) {
 			Entry cartEntry = addProductToCart(cart, quantity, product);
+			reserveStock(cartEntry.getProductId(), quantity);
 			CartEntryDTO cartEntryDTO = new CartEntryDTO();
 			populateCartEntry(cartEntry, cartEntryDTO);
 			return cartEntryDTO;
@@ -81,11 +83,23 @@ public class CartServiceImpl implements CartService {
 	}
 
 	@Override
-	public CartDTO createCart() {
+	public CartDTO createCart(String userId) {
+		
+		Cart existingCart = cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE.toString());
+		
+		if(Objects.nonNull(existingCart)) {
+			CartDTO cartDTO = new CartDTO();
+			populate(existingCart, cartDTO);
+			return cartDTO;
+		}
+		
 		Cart cart = new Cart();
+		cart.setStatus(CartStatus.ACTIVE.toString());
+		cart.setUserId(userId);
 		cartRepository.save(cart);
 		CartDTO cartDTO = new CartDTO();
 		populate(cart, cartDTO);
+		
 		return cartDTO;
 	}
 
@@ -154,7 +168,7 @@ public class CartServiceImpl implements CartService {
 		cartEntry.setProductName(product.getName());
 		cartEntry.setProductId(product.getProductId());
 		cartEntry.setPrice(product.getPrice());
-		cartEntry.setQuantity(Double.valueOf(product.getAvailableQty().toString()));
+		cartEntry.setQuantity(Double.valueOf(quantity.toString()));
 		cartEntry.setImageUrl(product.getPrimaryImageUrl());
 		cartEntryRepository.save(cartEntry);
 		cart.getCartEntries().add(cartEntry);
@@ -196,19 +210,20 @@ public class CartServiceImpl implements CartService {
 		target.setItemsTotal(total);
 		target.setTotalDiscount(totalDiscount);
 		target.setItems(cartEntries);
-//		target.setStatus("Active");
+		target.setStatus(source.getStatus());
 		target.setUserId(source.getUserId());
 
 	}
 
 	@Override
 	public CartDTO findCartByUser(String userId) {
-		Cart cart = cartRepository.findByUserId(userId);
+		Cart cart = cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE.toString());
 		CartDTO cartData = new CartDTO();
 		if (cart != null) {
 			populate(cart, cartData);
+		} else {
+			return createCart(userId);
 		}
-		populate(cart, cartData);
 		return cartData;
 	}
 
@@ -219,23 +234,17 @@ public class CartServiceImpl implements CartService {
 		if (cartOp.isPresent()) {
 			cart = cartOp.get();
 		}
-		cart.setStatus("Ordered");
+		cart.setStatus(CartStatus.ORDERED.toString());
 		cartRepository.save(cart);
-		deductStock(cart.getCartEntries());
+		commitStock(cart.getCartEntries());
 		CartDTO cartData = new CartDTO();
 		populate(cart, cartData);
 		return true;
 
 	}
 
-	private void deductStock(List<Entry> cartEntries) {
-		for (Entry entry : cartEntries) {
-			reduceStock(entry.getProductId(), entry.getQuantity());
-		}
+	private void reserveStock(String productId, Long quantity) {
 
-	}
-
-	private void reduceStock(String productId, Double quantity) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -247,11 +256,36 @@ public class CartServiceImpl implements CartService {
 
 		URI uri = null;
 		try {
-			uri = new URI(INVENTORY_SERVICE_URL + "inventory/reduceStock");
+			uri = new URI(INVENTORY_SERVICE_URL + "inventory/reserve");
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 		restTemplate.postForObject(uri, httpEntity, Boolean.class);
+	}
 
+	private void commitStock(List<Entry> cartEntries) {
+		for (Entry entry : cartEntries) {
+			commitStock(entry.getProductId(), entry.getQuantity());
+		}
+	}
+
+	private void commitStock(String productId, Double quantity) {
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		ProductStockDTO productStockDTO = new ProductStockDTO();
+		productStockDTO.setProductId(productId);
+		productStockDTO.setQuantity(quantity.intValue());
+		HttpEntity<ProductStockDTO> httpEntity = new HttpEntity<>(productStockDTO, headers);
+
+		URI uri = null;
+		try {
+			uri = new URI(INVENTORY_SERVICE_URL + "inventory/commit");
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		restTemplate.postForObject(uri, httpEntity, Boolean.class);
 	}
 }

@@ -56,9 +56,11 @@
 			<version>2.6.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.dto</groupId>
-			<artifactId>maven-library</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<groupId>com.nagp</groupId>
+			<artifactId>com.nagp</artifactId>
+			<scope>system</scope>
+			<version>1.0</version>
+			<systemPath>${basedir}\src\main\resources\maven-library-1.0.0-SNAPSHOT.jar</systemPath>
 		</dependency>
 		<dependency> 
 			<groupId>mysql</groupId>

@@ -15,7 +15,7 @@ public interface CartService {
 
 	CartDTO findCartByUser(String userId);
 
-	CartDTO createCart();
+	CartDTO createCart(String userId);
 
 	void removeProductFromCart(String productId, Long cartId, Long quantity);
 	
