@@ -32,7 +32,7 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
-    @CrossOrigin(origins = "*")
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/entry", method = RequestMethod.POST)
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
@@ -41,7 +41,7 @@ public class CartController {
 				addToCartRequest.getQuantity());
 	}
 
-    @CrossOrigin(origins = "*")
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/{cartId}", method = RequestMethod.GET)
 	@ApiOperation("Get cart by cartId")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
@@ -49,24 +49,23 @@ public class CartController {
 		return cartService.getCartById(Long.parseLong(cartId));
 	}
 
-    @CrossOrigin(origins = "*")
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
 	@ApiOperation("Get cart by userId")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
 	public CartDTO getCartByUserId(@PathVariable("userId") @NotBlank(message = "id must not be empty") String userId) {
 		return cartService.findCartByUser(userId);
 	}
-	
 
-    @CrossOrigin(origins = "*")
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/create/{userId}", method = RequestMethod.POST)
 	@ApiOperation("Create cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
 	public CartDTO createCart(@PathVariable("userId") @NotBlank(message = "id must not be empty") String userId) {
 		return cartService.createCart(userId);
 	}
-	
-    @CrossOrigin(origins = "*")
+
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/entry", method = RequestMethod.PUT)
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
@@ -74,13 +73,12 @@ public class CartController {
 		cartService.removeProductFromCart(addToCartRequest.getProductId(), addToCartRequest.getCartId(),
 				addToCartRequest.getQuantity());
 	}
-    
-    @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/place/order", method = RequestMethod.PUT)
-    @ApiOperation("Place order")
+
+	@CrossOrigin(origins = "*")
+	@RequestMapping(value = "/place/order", method = RequestMethod.PUT)
+	@ApiOperation("Place order")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = PlaceOrderRequestDTO.class) })
-	public boolean placeOrder(@RequestBody PlaceOrderRequestDTO placeOrderRequestDTO)
-	{
+	public boolean placeOrder(@RequestBody PlaceOrderRequestDTO placeOrderRequestDTO) {
 		return cartService.placeOrder(placeOrderRequestDTO);
 	}
 }

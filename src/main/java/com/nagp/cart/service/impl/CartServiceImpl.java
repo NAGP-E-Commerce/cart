@@ -84,22 +84,22 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public CartDTO createCart(String userId) {
-		
+
 		Cart existingCart = cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE.toString());
-		
-		if(Objects.nonNull(existingCart)) {
+
+		if (Objects.nonNull(existingCart)) {
 			CartDTO cartDTO = new CartDTO();
 			populate(existingCart, cartDTO);
 			return cartDTO;
 		}
-		
+
 		Cart cart = new Cart();
 		cart.setStatus(CartStatus.ACTIVE.toString());
 		cart.setUserId(userId);
 		cartRepository.save(cart);
 		CartDTO cartDTO = new CartDTO();
 		populate(cart, cartDTO);
-		
+
 		return cartDTO;
 	}
 

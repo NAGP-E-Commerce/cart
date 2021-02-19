@@ -55,13 +55,6 @@
 			<artifactId>springfox-swagger2</artifactId>
 			<version>2.6.1</version>
 		</dependency>
-		<dependency>
-			<groupId>com.nagp</groupId>
-			<artifactId>com.nagp</artifactId>
-			<scope>system</scope>
-			<version>1.0</version>
-			<systemPath>${basedir}\src\main\resources\maven-library-1.0.0-SNAPSHOT.jar</systemPath>
-		</dependency>
 		<dependency> 
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId> 
