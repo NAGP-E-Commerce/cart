@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,10 +46,10 @@ public class CartServiceImpl implements CartService {
 	RestTemplate restTemplate;
 
 	@Value("${inventory.service.url}")
-	private String PRODUCT_SERVICE_URL;
+	private String INVENTORY_SERVICE_URL;
 
 	@Value("${product.service.url}")
-	private String INVENTORY_SERVICE_URL;
+	private String PRODUCT_SERVICE_URL;
 
 	@Override
 	public CartEntryDTO addToCart(String productId, Long cartId, Long quantity) {
@@ -98,6 +99,7 @@ public class CartServiceImpl implements CartService {
 
 		Cart cart = new Cart();
 		cart.setStatus(CartStatus.ACTIVE.toString());
+		cart.setTime(new Date());
 		cart.setUserId(userId);
 		cartRepository.save(cart);
 		CartDTO cartDTO = new CartDTO();
@@ -215,6 +217,7 @@ public class CartServiceImpl implements CartService {
 		target.setItems(cartEntries);
 		target.setStatus(source.getStatus());
 		target.setUserId(source.getUserId());
+		target.setTime(source.getTime());
 
 	}
 
@@ -256,6 +259,7 @@ public class CartServiceImpl implements CartService {
 			return false;
 		}
 		cart.setStatus(CartStatus.ORDERED.toString());
+		cart.setTime(new Date());
 		cartRepository.save(cart);
 		commitStock(cart.getCartEntries());
 		CartDTO cartData = new CartDTO();

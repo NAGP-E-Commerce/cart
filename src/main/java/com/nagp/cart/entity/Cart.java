@@ -1,6 +1,7 @@
 package com.nagp.cart.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -13,23 +14,23 @@ import javax.persistence.OneToMany;
 
 import lombok.Data;
 
-
 @Data
 @Entity(name = "cart")
 public class Cart {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE)
+	@GeneratedValue(strategy = GenerationType.TABLE)
 	private Long id;
-	
+
 	@OneToMany
-	@JoinTable(name = "cart_entry",
-    joinColumns = @JoinColumn(name = "entry_id", referencedColumnName = "id"))
+	@JoinTable(name = "cart_entry", joinColumns = @JoinColumn(name = "entry_id", referencedColumnName = "id"))
 	private List<Entry> cartEntries = new ArrayList<Entry>();
-	
+
 	private String userId;
-	
+
 	private String status;
+
+	private Date time;
 
 	public Long getId() {
 		return id;
@@ -63,4 +64,11 @@ public class Cart {
 		this.status = status;
 	}
 
+	public Date getTime() {
+		return time;
+	}
+
+	public void setTime(Date time) {
+		this.time = time;
+	}
 }

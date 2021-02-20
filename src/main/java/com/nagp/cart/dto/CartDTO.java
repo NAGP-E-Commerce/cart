@@ -1,6 +1,7 @@
 package com.nagp.cart.dto;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import lombok.Data;
@@ -23,8 +24,10 @@ public class CartDTO implements Serializable {
 	private String userId;
 
 	private long id;
-	
+
 	private String status;
+
+	private Date time;
 
 	public List<CartEntryDTO> getItems() {
 		return items;
@@ -88,6 +91,14 @@ public class CartDTO implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public Date getTime() {
+		return time;
+	}
+
+	public void setTime(Date time) {
+		this.time = time;
 	}
 
 }
