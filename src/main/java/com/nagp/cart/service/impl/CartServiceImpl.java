@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,9 +44,11 @@ public class CartServiceImpl implements CartService {
 	@Autowired
 	RestTemplate restTemplate;
 
-	private static final String PRODUCT_SERVICE_URL = "http://localhost:8090/api/ecommerce/";
+	@Value("${inventory.service.url}")
+	private String PRODUCT_SERVICE_URL;
 
-	private static final String INVENTORY_SERVICE_URL = "http://localhost:8091/im/api/ecommerce/";
+	@Value("${product.service.url}")
+	private String INVENTORY_SERVICE_URL;
 
 	@Override
 	public CartEntryDTO addToCart(String productId, Long cartId, Long quantity) {
@@ -226,13 +229,31 @@ public class CartServiceImpl implements CartService {
 		}
 		return cartData;
 	}
+	
+	@Override
+	public List<CartDTO> findOrdersByUserId(String userId) {
+		List<Cart> orders = cartRepository.findAllByUserIdAndStatus(userId, CartStatus.ORDERED.toString());
+		List<CartDTO> orderDTOs = new ArrayList<>();
+		if (!CollectionUtils.isEmpty(orders)) {
+			orders.forEach(order -> {
+				CartDTO orderDTO = new CartDTO();
+				populate(order, orderDTO);
+				orderDTOs.add(orderDTO);
+			});
+		}
+		return orderDTOs;
+	}
 
 	@Override
-	public boolean placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO) {
+	public boolean placeOrder(String cartId) {
 		Cart cart = null;
-		Optional<Cart> cartOp = cartRepository.findById(placeOrderRequestDTO.getCartId());
+		Optional<Cart> cartOp = cartRepository.findById(Long.valueOf(cartId));
 		if (cartOp.isPresent()) {
 			cart = cartOp.get();
+		}
+		if (CollectionUtils.isEmpty(cart.getCartEntries())
+				|| CartStatus.ORDERED.toString().equalsIgnoreCase(cart.getStatus())) {
+			return false;
 		}
 		cart.setStatus(CartStatus.ORDERED.toString());
 		cartRepository.save(cart);

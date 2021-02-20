@@ -1,10 +1,11 @@
 package com.nagp.cart.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.nagp.cart.dto.CartDTO;
 import com.nagp.cart.dto.CartEntryDTO;
-import com.nagp.cart.dto.PlaceOrderRequestDTO;
 
 @Service
 public interface CartService {
@@ -18,6 +19,8 @@ public interface CartService {
 	CartDTO createCart(String userId);
 
 	void removeProductFromCart(String productId, Long cartId, Long quantity);
-	
-	boolean placeOrder(PlaceOrderRequestDTO cartId);
+
+	boolean placeOrder(String cartId);
+
+	List<CartDTO> findOrdersByUserId(String userId);
 }
