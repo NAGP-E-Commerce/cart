@@ -1,0 +1,71 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/oceanic-craft-302516/cart', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/oceanic-craft-302516/cart']
+  #images: ['gcr.io/oceanic-craft-302516/test']
+#step 3
+- name: 'gcr.io/cloud-builders/kubectl'
+  args: ['apply', '-f', 'deployment.yml']
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+#step 4
+- name: 'gcr.io/cloud-builders/kubectl'
+  args: [
+   'set', 
+   'image', 
+   'deployment', 
+   'app', 
+   'app=gcr.io/oceanic-craft-302516/cart'
+  ]
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+# push images to Google Container Registry with tags
+images: [
+   'gcr.io/oceanic-craft-302516/cart:latest'
+  ]
+
+
+
+
+
+
+
+
+
+
+# steps:
+# - id: 'configure kubectl'
+#   name: 'gcr.io/cloud-builders/gcloud'
+#   env:
+#     - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+#     - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+#     - 'KUBECONFIG=/kube/config'
+#   entrypoint: 'sh'
+#   args:
+#     - '-c'
+#     - |
+#       gcloud container clusters get-credentials "cluster-1" --zone "us-central1-c"
+#   volumes:
+#     - name: 'kube'
+#       path: /kube
+
+# - id: 'deploy to k8s'
+#   name: 'gcr.io/cloud-builders/gcloud'
+#   env:
+#     - 'KUBECONFIG=/kube/config'
+#   entrypoint: 'sh'
+#   args:
+#     - '-c'
+#     - |
+#       kubectl set image deployment/app app=gcr.io/oceanic-craft-302516/test:latest
+#   volumes:
+#     - name: 'kube'
+#       path: /kube  
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['build', '-t', 'gcr.io/oceanic-craft-302516/test', '.']
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['push', 'gcr.io/oceanic-craft-302516/test']
+# images: ['gcr.io/oceanic-craft-302516/test']
