@@ -5,5 +5,5 @@ RUN mvn -f /home/app/pom.xml install
 RUN mvn -f /home/app/pom.xml clean package
 FROM openjdk:8-jdk-alpine
 ARG JAR_FILE=target/*.jar
-COPY --from=build /home/app/target/spring-boot-product-service-0.0.1-SNAPSHOT.jar /usr/local/lib/cart.jar
+COPY --from=build /home/app/target/spring-boot-cart-service-0.0.1-SNAPSHOT.jar /usr/local/lib/cart.jar
 ENTRYPOINT ["java","-jar","/usr/local/lib/cart.jar"]
