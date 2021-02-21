@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cart
+  name: cart1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cart
+      app: cart1
   template:
     metadata:
       labels:
-        app: cart
+        app: cart1
     spec:
       containers:
       - name: cart
-        image: gcr.io/oceanic-craft-302516/cart:latest
+        image: gcr.io/oceanic-craft-302516/cart1:latest
         ports:
         - containerPort: 8092
         imagePullPolicy: Always
