@@ -13,7 +13,7 @@ spec:
         app: cart3
     spec:
       containers:
-      - name: cart
+      - name: cart3
         image: gcr.io/oceanic-craft-302516/cart3:latest
         ports:
         - containerPort: 8092
