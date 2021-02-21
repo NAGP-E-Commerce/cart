@@ -31,7 +31,6 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
-	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/entry", method = RequestMethod.POST)
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
@@ -40,7 +39,6 @@ public class CartController {
 				addToCartRequest.getQuantity());
 	}
 
-	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/{cartId}", method = RequestMethod.GET)
 	@ApiOperation("Get cart by cartId")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
@@ -48,7 +46,6 @@ public class CartController {
 		return cartService.getCartById(Long.parseLong(cartId));
 	}
 
-	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
 	@ApiOperation("Get cart by userId")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
@@ -56,7 +53,6 @@ public class CartController {
 		return cartService.findCartByUser(userId);
 	}
 
-	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/create/{userId}", method = RequestMethod.POST)
 	@ApiOperation("Create cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
@@ -64,7 +60,6 @@ public class CartController {
 		return cartService.createCart(userId);
 	}
 
-	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/entry", method = RequestMethod.PUT)
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
