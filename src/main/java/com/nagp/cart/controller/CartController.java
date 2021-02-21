@@ -31,6 +31,13 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
+	@RequestMapping(path = "/test", method = RequestMethod.GET)
+	@ApiOperation("Test cart")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
+	public String test() {
+		return "test cart service";
+	}
+
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/entry", method = RequestMethod.POST)
 	@ApiOperation("Add product to cart")
