@@ -8,4 +8,4 @@ spec:
     targetPort: 8092
   selector:
     app: cart
-  type: NodePort
+  type: LoadBalancer
