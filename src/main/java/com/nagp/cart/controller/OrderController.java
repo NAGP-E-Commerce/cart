@@ -31,6 +31,7 @@ public class OrderController {
 	@Autowired
 	private CartService cartService;
 
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/create/{cartId}", method = RequestMethod.POST)
 	@ApiOperation("Place order")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = PlaceOrderRequestDTO.class) })
@@ -38,6 +39,7 @@ public class OrderController {
 		return cartService.placeOrder(cartId);
 	}
 
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/{userId}", method = RequestMethod.GET)
 	@ApiOperation("Get Order by userId")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartDTO.class) })
