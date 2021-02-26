@@ -72,7 +72,7 @@ public class CartController {
 	}
 
 	@CrossOrigin(origins = "*")
-	@RequestMapping(value = "/entry", method = RequestMethod.PUT)
+	@RequestMapping(value = "/entry", method = RequestMethod.POST)
 	@ApiOperation("Add product to cart")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = CartEntryDTO.class) })
 	public void removeProductFromCart(@RequestBody AddProductToCartRequestDTO addToCartRequest) {
